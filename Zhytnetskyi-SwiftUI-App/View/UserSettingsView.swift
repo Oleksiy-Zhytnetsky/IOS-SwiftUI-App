@@ -12,35 +12,46 @@ struct UserSettingsView: View {
     @EnvironmentObject private var viewModel: ContentViewModel
     
     var body: some View {
-        VStack {
-            Text("Settings")
-                .font(Fonts.headerLabel)
+        ZStack {
+            ResignFRView()
+                .zIndex(0)
             
-            HStack {
-                Text("User name")
-                    .padding(.horizontal, 10)
-                    .padding(.top, 15)
-                    .font(Fonts.inputLabel)
+            VStack {
+                Text("Settings")
+                    .font(Fonts.headerLabel)
                 
-                Spacer()
-            }
-            
-            HStack {
-                TextField("John Doe", text: self.$viewModel.authorName)
+                HStack {
+                    Text("User name")
+                        .padding(.horizontal, 10)
+                        .padding(.top, 15)
+                        .font(Fonts.inputLabel)
+                    
+                    Spacer()
+                }
+                
+                HStack {
+                    TextField(
+                        "John Doe",
+                        text: self.$viewModel.authorName,
+                        onEditingChanged: { isEditing in
+                            if (!isEditing) {
+                                viewModel.saveSettings()
+                            }
+                        }
+                    )
                     .padding(.leading, 5)
                     .border(Color.primary, width: 1)
-                    .frame(
-                        width: UIScreen.main.bounds.width * 0.8
-                    )
                     .clipShape(RoundedRectangle(cornerRadius: 2))
                     .padding(.horizontal, 10)
                     .padding(.top, 0)
                     .font(Fonts.input)
-                    
+                        
+                    Spacer()
+                }
                 Spacer()
             }
-            Spacer()
+            .padding(.vertical, 10)
+            .zIndex(1)
         }
-        .padding(.vertical, 10)
     }
 }

@@ -20,6 +20,8 @@ struct PostView: View {
                 // Post top bar
                 HStack(spacing: 4) {
                     Text(self.post.authorName)
+                        .lineLimit(1)
+                    
                     Text("⋅")
                     Text("10h")
                     Text("⋅")

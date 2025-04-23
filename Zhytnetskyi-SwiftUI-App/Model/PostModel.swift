@@ -7,11 +7,10 @@
 
 import SwiftUI
 
-struct Post {
-    
+struct Post: Identifiable, Codable {
+    let id: UUID
     let authorName: String
     let title: String
     let text: String
     let image: Data?
-    
 }

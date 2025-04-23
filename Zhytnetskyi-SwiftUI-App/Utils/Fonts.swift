@@ -11,6 +11,8 @@ struct Fonts {
     static let headerLabel = Font.system(size: 32, weight: .bold)
     static let secondaryHeaderLabel = Font.system(size: 28, weight: .bold)
     static let smallHeaderLabel = Font.system(size: 18, weight: .bold)
+    
+    static let secondaryLabel = Font.system(size: 24, weight: .regular)
     static let smallLabel = Font.system(size: 18, weight: .regular)
     
     static let inputLabel = Font.system(size: 26, weight: .semibold)

@@ -21,7 +21,7 @@ struct ContentView: View {
                     }
                 }
             
-            self.postCreateSubview
+            PostCreateView()
                 .tabItem {
                     VStack {
                         Image(systemName: "plus")
@@ -29,7 +29,7 @@ struct ContentView: View {
                     }
                 }
             
-            self.userSettingsSubview
+            UserSettingsView()
                 .tabItem {
                     VStack {
                         Image(systemName: "gearshape.fill")
@@ -42,30 +42,35 @@ struct ContentView: View {
     
     @ViewBuilder
     private var postListSubview: some View {
-        ScrollView {
-            LazyVStack {
-                ForEach(
-                    Array(self.viewModel.posts.enumerated()),
-                    id: \.offset
-                ) { _, post in
-                    PostView(post: post)
-                        .frame(
-                            height: 300
-                        )
+        
+        Group {
+            if (self.viewModel.posts.isEmpty) {
+                VStack {
+                    Text("No posts here yet")
+                        .font(Fonts.headerLabel)
                         .padding(.bottom, 5)
+                    
+                    Text("Create one by navigating to the \"New post\" tab!")
+                        .font(Fonts.secondaryLabel)
+                }
+                .multilineTextAlignment(.center)
+                .padding(.horizontal, 10)
+            }
+            else {
+                ScrollView {
+                    LazyVStack {
+                        ForEach(self.viewModel.posts) { post in
+                            PostView(post: post)
+                                .frame(
+                                    height: 300
+                                )
+                                .padding(.bottom, 5)
+                                .padding(.horizontal, 5)
+                        }
+                    }
                 }
             }
         }
-    }
-    
-    @ViewBuilder
-    private var postCreateSubview: some View {
-        PostCreateView()
-    }
-    
-    @ViewBuilder
-    private var userSettingsSubview: some View {
-        UserSettingsView()
     }
 }
 
