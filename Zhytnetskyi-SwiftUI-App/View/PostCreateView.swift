@@ -38,8 +38,10 @@ struct PostCreateView: View {
                         .background(Color.red)
                         .foregroundStyle(Color.primary)
                         .font(Fonts.button)
-                        .border(Color.primary, width: 2)
-                        .clipShape(RoundedRectangle(cornerRadius: 4))
+                        .clipShape(RoundedRectangle(cornerRadius: 12))
+                        .padding(2)
+                        .background(Color.primary)
+                        .clipShape(RoundedRectangle(cornerRadius: 12))
                         Spacer(minLength: 10)
                         
                         Text("Create Post")
@@ -57,8 +59,10 @@ struct PostCreateView: View {
                         .background(Color.blue)
                         .foregroundStyle(Color.primary)
                         .font(Fonts.button)
-                        .border(Color.primary, width: 2)
-                        .clipShape(RoundedRectangle(cornerRadius: 4))
+                        .clipShape(RoundedRectangle(cornerRadius: 12))
+                        .padding(2)
+                        .background(Color.primary)
+                        .clipShape(RoundedRectangle(cornerRadius: 12))
                     }
                     .padding(.bottom, 5)
                     
