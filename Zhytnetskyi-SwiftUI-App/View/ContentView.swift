@@ -59,7 +59,7 @@ struct ContentView: View {
             else {
                 ScrollView {
                     LazyVStack {
-                        ForEach(self.viewModel.posts) { post in
+                        ForEach(self.viewModel.posts, id: \.data.id) { post in
                             PostView(post: post)
                                 .frame(
                                     height: 300

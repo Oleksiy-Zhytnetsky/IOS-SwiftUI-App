@@ -10,24 +10,17 @@ import SwiftUI
 class ContentViewModel: ObservableObject {
     
     private enum Const {
-        static let postsFilename = "posts.json"
         static let settingsFilename = "settings.json"
-        
-        static let docsURL = FileManager.default.urls(
-            for: .documentDirectory,
-            in: .userDomainMask
-        ).first!
-    }
-    
-    private var postsFileURL: URL {
-        return Const.docsURL.appendingPathComponent(Const.postsFilename)
     }
     
     private var settingsFileURL: URL {
-        return Const.docsURL.appendingPathComponent(Const.settingsFilename)
+        return FileManager.default.urls(
+            for: .documentDirectory,
+            in: .userDomainMask
+        ).first!.appendingPathComponent(Const.settingsFilename)
     }
     
-    @Published private(set) var posts: [Post] = []
+    @Published private(set) var posts: [ExtendedPost] = []
     @Published var authorName: String = ""
 
     static let shared = ContentViewModel()
@@ -37,15 +30,21 @@ class ContentViewModel: ObservableObject {
             return
         }
         
-        let newPost = Post(
-            id: UUID(),
-            authorName: self.authorName,
+        let postData = Post(
+            author_fullname: self.authorName,
+            domain: "ios",
             title: title,
-            text: text,
+            num_comments: 0,
+            score: 0,
+            selftext: text,
+            url: "",
+            created: Date.now.timeIntervalSince1970,
+            permalink: "",
             image: image
         )
+        let newPost = ExtendedPost(data: postData, saved: true)
         self.posts.insert(newPost, at: 0)
-        self.savePosts()
+        SavedPostsManager.shared.updatePost(newPost)
     }
     
     func isValidAuthor() -> Bool {
@@ -59,24 +58,7 @@ class ContentViewModel: ObservableObject {
     
     private init() {
         loadSettings()
-        loadPosts()
-    }
-    
-    // Post persistence
-    private func savePosts() {
-        if let data = try? JSONEncoder().encode(self.posts) {
-            try? data.write(to: self.postsFileURL)
-        }
-    }
-    
-    private func loadPosts() {
-        guard let data = try? Data(contentsOf: self.postsFileURL) else {
-            return
-        }
-        
-        if let savedPosts = try? JSONDecoder().decode([Post].self, from: data) {
-            self.posts = savedPosts
-        }
+        self.posts = SavedPostsManager.shared.loadSavedPosts()
     }
     
     // Post author name persistence

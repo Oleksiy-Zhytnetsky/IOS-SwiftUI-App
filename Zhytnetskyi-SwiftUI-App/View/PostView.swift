@@ -8,7 +8,7 @@
 import SwiftUI
 
 struct PostView: View {
-    let post: Post
+    @State var post: ExtendedPost
     
     var body: some View {
         ZStack {
@@ -19,26 +19,37 @@ struct PostView: View {
             VStack {
                 // Post top bar
                 HStack(spacing: 4) {
-                    Text(self.post.authorName)
+                    Text(self.post.data.author_fullname)
                         .lineLimit(1)
                     
                     Text("⋅")
-                    Text("10h")
+                    Text(UIKitUtils.formatTimeSincePost(self.post.data.created))
                     Text("⋅")
-                    Text("domain")
+                    Text(self.post.data.domain)
                     
                     Spacer()
                     
-                    Image(systemName: "bookmark")
+                    Image(systemName: "bookmark\(self.post.saved ? ".fill" : "")")
                         .resizable()
                         .frame(width: 20, height: 30)
+                        .onTapGesture {
+                            print("Tapped bookmark on local post!")
+                            
+                            /*
+                             * Although the post is just local state,
+                             * this assignment is vital for post deletion to work
+                             */
+                            self.post.saved = false
+                            SavedPostsManager.shared.updatePost(self.post)
+                            print("All posts: \(SavedPostsManager.shared.getAllSavedPosts())")
+                        }
                 }
                 .font(Fonts.smallLabel)
                 .padding(.top, 5)
                 
                 // Post title
                 HStack {
-                    Text(self.post.title)
+                    Text(self.post.data.title)
                         .multilineTextAlignment(.leading)
                         .font(Fonts.smallHeaderLabel)
                         .padding(.top, -5)
@@ -47,7 +58,7 @@ struct PostView: View {
                 
                 // Post image or placeholder
                 Group {
-                    if let data = self.post.image,
+                    if let data = self.post.data.image,
                        let uiImage = UIImage(data: data) {
                         Image(uiImage: uiImage)
                             .resizable()
@@ -64,11 +75,11 @@ struct PostView: View {
                 // Post bottom bar
                 HStack {
                     Image(systemName: "arrowshape.up")
-                    Text("100M")
+                    Text(UIKitUtils.formatNumCount(self.post.data.score))
                     Spacer()
                     
                     Image(systemName: "bubble")
-                    Text("100M")
+                    Text(UIKitUtils.formatNumCount(self.post.data.num_comments))
                     
                     Spacer()
                     Image(systemName: "square.and.arrow.up")
