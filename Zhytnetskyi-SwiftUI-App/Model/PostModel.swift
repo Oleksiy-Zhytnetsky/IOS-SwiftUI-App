@@ -21,10 +21,14 @@ struct Post: Identifiable, Codable {
     let image: Data?
     
     var cleanedUrl: String {
-        return url.replacingOccurrences(of: "&amp;", with: "&")
+        return self.url.replacingOccurrences(of: "&amp;", with: "&")
     }
     
     var postUrl: String {
-        return "https://www.reddit.com" + permalink
+        return "https://www.reddit.com" + self.permalink
+    }
+    
+    var isLocal: Bool {
+        return self.permalink.isEmpty
     }
 }

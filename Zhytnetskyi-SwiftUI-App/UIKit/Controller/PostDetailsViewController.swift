@@ -139,6 +139,7 @@ final class PostDetailsViewController: UIViewController {
             object: nil,
             userInfo: [
                 "id": post.data.id,
+                "permalink": post.data.permalink,
                 "saved": post.saved
             ]
         )

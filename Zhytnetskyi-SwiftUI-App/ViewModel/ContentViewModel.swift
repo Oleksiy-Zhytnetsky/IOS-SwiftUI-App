@@ -32,7 +32,7 @@ class ContentViewModel: ObservableObject {
         
         let postData = Post(
             author_fullname: self.authorName,
-            domain: "ios",
+            domain: "local",
             title: title,
             num_comments: 0,
             score: 0,

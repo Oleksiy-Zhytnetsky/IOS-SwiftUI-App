@@ -15,6 +15,7 @@ final class PostListViewController: UITableViewController, UITextFieldDelegate {
         static let loadLimit = 15
         
         static let cellReuseId = "PostTableCell"
+        static let swiftUIcellReuseId = "SwiftUIPostTableCell"
         static let postSavedNotificationId = "PostSavedStatusChanged"
         static let postDetailsVCId = "PostDetailsViewController"
         
@@ -55,6 +56,11 @@ final class PostListViewController: UITableViewController, UITextFieldDelegate {
         )
         self.searchTextField.isHidden = true
         
+        self.tableView.register(
+            PostTableViewCellSwiftUI.self,
+            forCellReuseIdentifier: Const.swiftUIcellReuseId
+        )
+        
         loadPosts(limit: Const.loadLimit)
     }
     
@@ -70,15 +76,25 @@ final class PostListViewController: UITableViewController, UITextFieldDelegate {
         _ tableView: UITableView,
         cellForRowAt indexPath: IndexPath
     ) -> UITableViewCell {
-        let cell = tableView.dequeueReusableCell(
-            withIdentifier: Const.cellReuseId,
-            for: indexPath
-        ) as! PostTableViewCell
-        
         let post = self.posts[indexPath.row]
-        cell.configure(for: post)
-        cell.delegate = self
-        return cell
+        
+        if (post.data.isLocal) {
+            let cell = tableView.dequeueReusableCell(
+                withIdentifier: Const.swiftUIcellReuseId,
+                for: indexPath
+            ) as! PostTableViewCellSwiftUI
+            cell.configure(for: post, hostingVC: self)
+            return cell
+        }
+        else {
+            let cell = tableView.dequeueReusableCell(
+                withIdentifier: Const.cellReuseId,
+                for: indexPath
+            ) as! PostTableViewCell
+            cell.configure(for: post)
+            cell.delegate = self
+            return cell
+        }
     }
     
     // MARK: - UIScrollViewDelegate override
@@ -131,17 +147,22 @@ final class PostListViewController: UITableViewController, UITextFieldDelegate {
     private func onPostSavedStatusChanged(_ notification: Notification) {
         guard let userInfo = notification.userInfo,
               let id = userInfo["id"] as? UUID,
+              let permalink = userInfo["permalink"] as? String,
               let saved = userInfo["saved"] as? Bool else {
             return
         }
         
-        if let index = self.posts.firstIndex(where: { $0.data.id == id }) {
+        if let index = self.posts.firstIndex(where: {
+            PersistenceUtils.postMatchesInfo(post: $0.data, id: id, permalink: permalink)
+        }) {
             self.posts[index].saved = saved
             let indexPath = IndexPath(row: index, section: 0)
             if self.isOfflineMode && !saved {
                 self.posts.remove(at: index)
                 tableView.deleteRows(at: [indexPath], with: .automatic)
-                allSavedPosts.removeAll(where: { $0.data.id == id })
+                allSavedPosts.removeAll(where: {
+                    PersistenceUtils.postMatchesInfo(post: $0.data, id: id, permalink: permalink)
+                })
             }
             else {
                 tableView.reloadRows(at: [indexPath], with: .none)
@@ -191,9 +212,7 @@ final class PostListViewController: UITableViewController, UITextFieldDelegate {
                 )
                 
                 let newPosts = response.data.children.map { child in
-                    let isSaved = SavedPostsManager.shared.isPostSaved(
-                        id: child.data.id
-                    )
+                    let isSaved = SavedPostsManager.shared.isPostSaved(child.data)
                     return ExtendedPost(
                         data: child.data,
                         saved: isSaved
@@ -225,6 +244,7 @@ final class PostListViewController: UITableViewController, UITextFieldDelegate {
     }
 }
 
+// MARK: - Extensions
 extension PostListViewController: PostTableViewCellDelegate {
     func postTableViewCellDidTap(_ cell: PostTableViewCell) {
         guard let indexPath = self.tableView.indexPath(for: cell) else {
@@ -232,7 +252,7 @@ extension PostListViewController: PostTableViewCellDelegate {
         }
         
         let post = self.posts[indexPath.row]
-        let storyboard = UIStoryboard(name: "Main", bundle: nil)
+        let storyboard = UIStoryboard(name: "Main", bundle: .main)
         let postDetailsVC = storyboard.instantiateViewController(
             withIdentifier: Const.postDetailsVCId
         ) as! PostDetailsViewController
@@ -242,5 +262,18 @@ extension PostListViewController: PostTableViewCellDelegate {
             postDetailsVC,
             animated: true
         )
+    }
+}
+
+extension UIView {
+    var parentViewController: UIViewController? {
+        var parentResponder: UIResponder? = self
+        while parentResponder != nil {
+            parentResponder = parentResponder!.next
+            if let viewController = parentResponder as? UIViewController {
+                return viewController
+            }
+        }
+        return nil
     }
 }

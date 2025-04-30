@@ -49,18 +49,18 @@ final class SavedPostsManager {
     
     func updatePost(_ post: ExtendedPost) {
         if post.saved {
-            if !self.savedPosts.contains(where: { $0.data.id == post.data.id }) {
+            if !self.savedPosts.contains(where: { areIdentical($0.data, post.data) }) {
                 self.savedPosts.append(post)
             }
         }
         else {
-            savedPosts.removeAll(where: { $0.data.id == post.data.id })
+            savedPosts.removeAll(where: { areIdentical($0.data, post.data) })
         }
         saveAll()
     }
     
-    func isPostSaved(id: UUID) -> Bool {
-        return self.savedPosts.contains(where: { $0.data.id == id })
+    func isPostSaved(_ post: Post) -> Bool {
+        return self.savedPosts.contains(where: { areIdentical($0.data, post) })
     }
         
     func getAllSavedPosts() -> [ExtendedPost] {
@@ -73,5 +73,13 @@ final class SavedPostsManager {
         if let data = try? encoder.encode(savedPosts) {
             try? data.write(to: self.fileUrl)
         }
+    }
+    
+    private func areIdentical(_ lhs: Post, _ rhs: Post) -> Bool {
+        PersistenceUtils.postMatchesInfo(
+            post: lhs,
+            id: rhs.id,
+            permalink: rhs.permalink
+        )
     }
 }

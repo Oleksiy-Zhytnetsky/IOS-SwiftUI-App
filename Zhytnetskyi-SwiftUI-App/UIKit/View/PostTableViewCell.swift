@@ -186,6 +186,7 @@ final class PostTableViewCell: UITableViewCell {
             object: nil,
             userInfo: [
                 "id": post.data.id,
+                "permalink": post.data.permalink,
                 "saved": post.saved
             ]
         )
@@ -199,19 +200,5 @@ final class PostTableViewCell: UITableViewCell {
         ) {
             self.bookmarkAnimView.isHidden = !self.bookmarkAnimView.isHidden
         }
-    }
-}
-
-// MARK: - Extensions
-extension UIView {
-    var parentViewController: UIViewController? {
-        var parentResponder: UIResponder? = self
-        while parentResponder != nil {
-            parentResponder = parentResponder!.next
-            if let viewController = parentResponder as? UIViewController {
-                return viewController
-            }
-        }
-        return nil
     }
 }

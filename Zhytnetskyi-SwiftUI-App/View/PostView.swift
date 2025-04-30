@@ -7,6 +7,8 @@
 
 import SwiftUI
 
+private typealias PostListConst = PostListViewController.Const
+
 struct PostView: View {
     @State var post: ExtendedPost
     
@@ -33,15 +35,21 @@ struct PostView: View {
                         .resizable()
                         .frame(width: 20, height: 30)
                         .onTapGesture {
-                            print("Tapped bookmark on local post!")
-                            
                             /*
                              * Although the post is just local state,
                              * this assignment is vital for post deletion to work
                              */
                             self.post.saved = false
                             SavedPostsManager.shared.updatePost(self.post)
-                            print("All posts: \(SavedPostsManager.shared.getAllSavedPosts())")
+                            NotificationCenter.default.post(
+                                name: NSNotification.Name(PostListConst.postSavedNotificationId),
+                                object: nil,
+                                userInfo: [
+                                    "id": self.post.data.id,
+                                    "permalink": self.post.data.permalink,
+                                    "saved": false
+                                ]
+                            )
                         }
                 }
                 .font(Fonts.smallLabel)

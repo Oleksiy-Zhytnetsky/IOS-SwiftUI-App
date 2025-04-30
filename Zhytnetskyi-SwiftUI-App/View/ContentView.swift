@@ -13,7 +13,8 @@ struct ContentView: View {
     
     var body: some View {
         TabView {
-            self.postListSubview
+//            self.postListSubview
+            PostListViewControllerSwiftUI()
                 .tabItem {
                     VStack {
                         Image(systemName: "list.bullet")
